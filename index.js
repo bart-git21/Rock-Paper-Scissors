@@ -1,7 +1,7 @@
 
 const gameBtn = document.querySelectorAll(".gameBtn");
-const computerBtn = document.querySelector(".computerBtn");
 const gameResult = document.querySelector(".gameResult");
+const computerButtons = document.querySelectorAll(".computerBtn");
 
 const winningCases = {
     "paper": [1, '<i class="fa-regular fa-hand"></i>'],
@@ -25,22 +25,31 @@ function getResultMessage(value) {
     switch (value) {
         case 0: return "it's a draw!";
         case 1:
-        case -2: return "You win!";
-        default: return "the Computer is a Winner!";
+        case -2: return "You won!";
+        default: return "You lose!";
     }
 }
-function enterResult(left, right) {
+function getResult(left, right) {
     const deltaValue = winningCases[left][0] - winningCases[right][0];
     gameResult.classList.add(getClass(deltaValue));
-    gameResult.textContent = getResultMessage(deltaValue);
+    return new Promise(
+        resolve => {
+            setTimeout(() => {
+                return resolve(gameResult.textContent = getResultMessage(deltaValue));
+            }, 500)
+        }
+    );
 }
 
 
 
 // ======================================================= game logic
 function startGame(elem) {
-    computerBtn.classList.remove("visibleBtn");
-    computerBtn.textContent = "";
+    computerButtons.forEach(
+        e => {
+            return e.classList.remove("btn-danger", "btnActive");
+        }
+    )
 
     gameResult.textContent = "";
     gameResult.className = gameResult.className.replace(/\bclass_[a-z]*/, "");
@@ -48,11 +57,14 @@ function startGame(elem) {
     gameBtn.forEach(e => e.classList.remove("btn-danger", "btnActive"))
     elem.classList.add("btn-danger", "btnActive");
 
-    setTimeout(() => {
-        const randomValue = getComputerChoice();
-        computerBtn.innerHTML = randomValue + winningCases[randomValue][1];
-        computerBtn.classList.add("visibleBtn");
-        enterResult(elem.value, randomValue);
+    setTimeout(async function () {
+        const computerChoise = getComputerChoice();
+        computerButtons.forEach(
+            e => {
+                e.value === computerChoise && e.classList.add("btn-danger", "btnActive");
+            }
+        )
+        await getResult(elem.value, computerChoise);
     }, 500);
 }
 gameBtn.forEach(
